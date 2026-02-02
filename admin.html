@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 - QR 출석 체크</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>관리자 페이지</h1>
+            <a href="index.html" class="back-btn">홈으로</a>
+        </header>
+
+        <section class="qr-section">
+            <h2>QR 코드 생성</h2>
+            <div class="form-group">
+                <label for="sessionName">출석 세션 이름:</label>
+                <input type="text" id="sessionName" placeholder="예: 2024-01-15 1교시">
+            </div>
+            <button id="generateQR" class="btn btn-primary">QR 코드 생성</button>
+
+            <div id="qrDisplay" class="qr-display" style="display: none;">
+                <h3>생성된 QR 코드</h3>
+                <div id="qrcode"></div>
+                <p class="session-info">세션: <span id="currentSession"></span></p>
+                <button id="endSession" class="btn btn-danger">출석 마감</button>
+            </div>
+        </section>
+
+        <section class="attendance-section">
+            <h2>출석 명단</h2>
+            <div class="filter-group">
+                <label for="sessionFilter">세션 선택:</label>
+                <select id="sessionFilter">
+                    <option value="all">전체 세션</option>
+                </select>
+                <button id="clearData" class="btn btn-warning">전체 데이터 삭제</button>
+            </div>
+            <div id="attendanceList" class="attendance-list">
+                <p class="empty-message">출석 기록이 없습니다.</p>
+            </div>
+        </section>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>

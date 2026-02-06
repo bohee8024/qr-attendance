@@ -21,10 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // 실시간 출석 데이터 리스닝
     listenToAttendance();
 
-    // 브라우저 알림 권한 요청
-    if (Notification.permission === 'default') {
-        Notification.requestPermission();
-    }
 });
 
 // 출석 페이지 URL 생성
@@ -221,12 +217,7 @@ function listenToAttendance() {
     const attendanceRef = database.ref('attendance');
 
     // 새 출석 데이터 감지
-    attendanceRef.on('child_added', (snapshot) => {
-        const record = snapshot.val();
-
-        // 알림 표시
-        showNotification(record);
-
+    attendanceRef.on('child_added', () => {
         // 출석 명단 새로고침
         const filterValue = document.getElementById('sessionFilter').value;
         loadAttendanceList(filterValue);
@@ -234,49 +225,6 @@ function listenToAttendance() {
 
     // 초기 데이터 로드
     loadAttendanceList('all');
-}
-
-// 알림 표시
-function showNotification(record) {
-    const notificationSection = document.getElementById('notificationSection');
-    const notificationList = document.getElementById('notificationList');
-
-    notificationSection.style.display = 'block';
-
-    const time = new Date(record.timestamp).toLocaleTimeString('ko-KR');
-    const checkTypeText = record.checkType === 'out' ? '퇴실' : '출석';
-
-    const parkingText = record.hasParking ? '주차 O' : '주차 X';
-
-    const notificationItem = document.createElement('div');
-    notificationItem.className = 'notification-item new';
-    notificationItem.innerHTML = `
-        <div class="notification-content">
-            <strong>${record.name}</strong>님이 ${checkTypeText}했습니다! (${parkingText})
-            <span class="notification-meta">${record.sessionName} · ${time}</span>
-        </div>
-    `;
-
-    // 맨 위에 추가
-    notificationList.insertBefore(notificationItem, notificationList.firstChild);
-
-    // 애니메이션 후 하이라이트 제거
-    setTimeout(() => {
-        notificationItem.classList.remove('new');
-    }, 3000);
-
-    // 최대 10개 알림만 유지
-    while (notificationList.children.length > 10) {
-        notificationList.removeChild(notificationList.lastChild);
-    }
-
-    // 브라우저 알림
-    if (Notification.permission === 'granted') {
-        new Notification(`${checkTypeText} 알림`, {
-            body: `${record.name}님이 ${checkTypeText}했습니다! (${parkingText}, ${record.sessionName})`,
-            icon: '👔'
-        });
-    }
 }
 
 // 출석 명단 로드
@@ -351,8 +299,6 @@ async function clearAllData() {
         await database.ref('sessions').remove();
 
         document.getElementById('qrDisplay').style.display = 'none';
-        document.getElementById('notificationSection').style.display = 'none';
-        document.getElementById('notificationList').innerHTML = '';
 
         currentSessionId = null;
         currentSessionName = null;

@@ -580,6 +580,61 @@ section h2 {
     margin: 40px auto 0;
 }
 
+/* 진행 중인 세션 섹션 */
+.active-sessions-section {
+    margin-top: 20px;
+    padding: 15px;
+    background: #e8f5e9;
+    border: 2px solid #4caf50;
+    border-radius: 10px;
+}
+
+.active-sessions-section h3 {
+    color: #2e7d32;
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+.active-session-item {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 1px solid #c8e6c9;
+}
+
+.active-session-item:hover {
+    background: #f1f8e9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.active-session-item:last-child {
+    margin-bottom: 0;
+}
+
+.active-session-item .session-name {
+    font-weight: bold;
+    color: #333;
+    font-size: 16px;
+}
+
+.active-session-item .session-time {
+    color: #666;
+    font-size: 13px;
+    margin-left: 15px;
+}
+
+.btn-small {
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
 /* 반응형 */
 @media (max-width: 768px) {
     .container {

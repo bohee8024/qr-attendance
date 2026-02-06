@@ -15,6 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // 세션 목록 로드
     loadSessions();
 
+    // 진행 중인 세션 로드
+    loadActiveSessions();
+
     // 실시간 출석 데이터 리스닝
     listenToAttendance();
 
@@ -148,6 +151,68 @@ function loadSessions() {
             });
         }
     });
+}
+
+// 진행 중인 세션 로드
+function loadActiveSessions() {
+    const sessionsRef = database.ref('sessions');
+    sessionsRef.on('value', (snapshot) => {
+        const sessions = snapshot.val();
+        const section = document.getElementById('activeSessionsSection');
+        const list = document.getElementById('activeSessionsList');
+
+        if (!sessions) {
+            section.style.display = 'none';
+            return;
+        }
+
+        // 진행 중인 세션만 필터링
+        const activeSessions = Object.values(sessions).filter(s => s.active);
+
+        if (activeSessions.length === 0) {
+            section.style.display = 'none';
+            return;
+        }
+
+        section.style.display = 'block';
+        list.innerHTML = activeSessions.map(session => {
+            const startTime = new Date(session.startTime).toLocaleString('ko-KR');
+            return `
+                <div class="active-session-item" onclick="showQRForSession('${session.id}', '${session.name}')">
+                    <div class="session-name">${session.name}</div>
+                    <div class="session-time">시작: ${startTime}</div>
+                    <button class="btn btn-primary btn-small">QR 코드 보기</button>
+                </div>
+            `;
+        }).join('');
+    });
+}
+
+// 특정 세션의 QR 코드 표시
+function showQRForSession(sessionId, sessionName) {
+    currentSessionId = sessionId;
+    currentSessionName = sessionName;
+
+    const qrDisplay = document.getElementById('qrDisplay');
+    const qrcodeDiv = document.getElementById('qrcode');
+    qrcodeDiv.innerHTML = '';
+
+    const attendanceUrl = getAttendanceUrl(sessionId, sessionName);
+
+    qrCodeInstance = new QRCode(qrcodeDiv, {
+        text: attendanceUrl,
+        width: 256,
+        height: 256,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.L
+    });
+
+    document.getElementById('currentSession').textContent = sessionName;
+    qrDisplay.style.display = 'block';
+
+    // QR 코드가 보이도록 스크롤
+    qrDisplay.scrollIntoView({ behavior: 'smooth' });
 }
 
 // 실시간 출석 데이터 리스닝

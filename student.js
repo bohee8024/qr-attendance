@@ -1,10 +1,4 @@
-// 로컬 스토리지 키
-const STORAGE_KEYS = {
-    CURRENT_SESSION: 'currentSession',
-    ATTENDANCE: 'attendanceRecords',
-    SESSIONS: 'sessions'
-};
-
+// 세션 정보
 let scannedSessionId = null;
 let scannedSessionName = null;
 
@@ -68,7 +62,7 @@ function goBackToHome() {
 }
 
 // 출석 제출
-function submitAttendance() {
+async function submitAttendance() {
     const name = document.getElementById('employeeName').value.trim();
     const employeeId = document.getElementById('employeeId').value.trim();
 
@@ -77,40 +71,52 @@ function submitAttendance() {
         return;
     }
 
-    // 이름/사번 저장 (다음 사용을 위해)
-    localStorage.setItem('employeeName', name);
-    if (employeeId) {
-        localStorage.setItem('employeeId', employeeId);
+    // 버튼 비활성화 (중복 클릭 방지)
+    const submitBtn = document.getElementById('submitAttendance');
+    submitBtn.disabled = true;
+    submitBtn.textContent = '처리 중...';
+
+    try {
+        // 중복 출석 확인
+        const attendanceRef = database.ref('attendance');
+        const snapshot = await attendanceRef
+            .orderByChild('sessionId')
+            .equalTo(scannedSessionId)
+            .once('value');
+
+        const existingRecords = snapshot.val();
+        if (existingRecords) {
+            const duplicate = Object.values(existingRecords).find(r =>
+                r.name === name && (employeeId ? r.employeeId === employeeId : true)
+            );
+
+            if (duplicate) {
+                showError('이미 출석 체크를 완료했습니다.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = '출석하기';
+                return;
+            }
+        }
+
+        // 출석 기록 추가
+        const newAttendanceRef = attendanceRef.push();
+        await newAttendanceRef.set({
+            sessionId: scannedSessionId,
+            sessionName: scannedSessionName,
+            name: name,
+            employeeId: employeeId || '-',
+            timestamp: new Date().toISOString()
+        });
+
+        // 단계 2로 이동 (완료)
+        goToStep2(name);
+
+    } catch (error) {
+        console.error('출석 저장 실패:', error);
+        showError('출석 저장에 실패했습니다. 다시 시도해주세요.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = '출석하기';
     }
-
-    // 중복 출석 확인
-    const records = JSON.parse(localStorage.getItem(STORAGE_KEYS.ATTENDANCE) || '[]');
-    const duplicate = records.find(r =>
-        r.sessionId === scannedSessionId &&
-        r.name === name &&
-        (employeeId ? r.employeeId === employeeId : true)
-    );
-
-    if (duplicate) {
-        showError('이미 출석 체크를 완료했습니다.');
-        return;
-    }
-
-    // 출석 기록 추가
-    const attendanceRecord = {
-        sessionId: scannedSessionId,
-        sessionName: scannedSessionName,
-        name: name,
-        employeeId: employeeId || '-',
-        timestamp: new Date().toISOString(),
-        isNew: true  // 새 출석 표시 (알림용)
-    };
-
-    records.push(attendanceRecord);
-    localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(records));
-
-    // 단계 2로 이동 (완료)
-    goToStep2(name);
 }
 
 // 에러 메시지 표시

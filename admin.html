@@ -17,7 +17,7 @@
             <h2>QR 코드 생성</h2>
             <div class="form-group">
                 <label for="sessionName">출석 세션 이름:</label>
-                <input type="text" id="sessionName" placeholder="예: 2024-01-15 1교시">
+                <input type="text" id="sessionName" placeholder="예: 2024-01-15 오전 회의">
             </div>
             <button id="generateQR" class="btn btn-primary">QR 코드 생성</button>
 
@@ -27,6 +27,11 @@
                 <p class="session-info">세션: <span id="currentSession"></span></p>
                 <button id="endSession" class="btn btn-danger">출석 마감</button>
             </div>
+        </section>
+
+        <section class="notification-section" id="notificationSection" style="display: none;">
+            <h2>실시간 알림</h2>
+            <div id="notificationList" class="notification-list"></div>
         </section>
 
         <section class="attendance-section">

@@ -6,12 +6,15 @@ const STORAGE_KEYS = {
 };
 
 let qrCodeInstance = null;
+let lastAttendanceCount = 0;
+let notificationSound = null;
 
 // 페이지 로드 시 초기화
 document.addEventListener('DOMContentLoaded', () => {
     loadAttendanceList();
     loadSessionFilter();
     checkActiveSession();
+    initNotificationSystem();
 
     // 이벤트 리스너 등록
     document.getElementById('generateQR').addEventListener('click', generateQRCode);
@@ -19,6 +22,93 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('sessionFilter').addEventListener('change', filterAttendance);
     document.getElementById('clearData').addEventListener('click', clearAllData);
 });
+
+// 알림 시스템 초기화
+function initNotificationSystem() {
+    // 현재 출석 수 저장
+    const records = JSON.parse(localStorage.getItem(STORAGE_KEYS.ATTENDANCE) || '[]');
+    lastAttendanceCount = records.length;
+
+    // 2초마다 새 출석 확인
+    setInterval(checkNewAttendance, 2000);
+
+    // storage 이벤트 리스너 (다른 탭에서 변경 시)
+    window.addEventListener('storage', (e) => {
+        if (e.key === STORAGE_KEYS.ATTENDANCE) {
+            checkNewAttendance();
+            loadAttendanceList(document.getElementById('sessionFilter').value);
+        }
+    });
+}
+
+// 새 출석 확인
+function checkNewAttendance() {
+    const records = JSON.parse(localStorage.getItem(STORAGE_KEYS.ATTENDANCE) || '[]');
+
+    if (records.length > lastAttendanceCount) {
+        // 새 출석자 찾기
+        const newRecords = records.filter(r => r.isNew);
+
+        newRecords.forEach(record => {
+            showNotification(record);
+            // isNew 플래그 제거
+            record.isNew = false;
+        });
+
+        // 업데이트된 레코드 저장
+        localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(records));
+
+        // 출석 명단 새로고침
+        loadAttendanceList(document.getElementById('sessionFilter').value);
+    }
+
+    lastAttendanceCount = records.length;
+}
+
+// 알림 표시
+function showNotification(record) {
+    const notificationSection = document.getElementById('notificationSection');
+    const notificationList = document.getElementById('notificationList');
+
+    notificationSection.style.display = 'block';
+
+    const sessions = JSON.parse(localStorage.getItem(STORAGE_KEYS.SESSIONS) || '[]');
+    const session = sessions.find(s => s.id === record.sessionId);
+    const sessionName = session ? session.name : '알 수 없는 세션';
+    const time = new Date(record.timestamp).toLocaleTimeString('ko-KR');
+
+    const notificationItem = document.createElement('div');
+    notificationItem.className = 'notification-item new';
+    notificationItem.innerHTML = `
+        <div class="notification-content">
+            <strong>${record.name}</strong>님이 출석했습니다!
+            <span class="notification-meta">${sessionName} · ${time}</span>
+        </div>
+    `;
+
+    // 맨 위에 추가
+    notificationList.insertBefore(notificationItem, notificationList.firstChild);
+
+    // 애니메이션 후 하이라이트 제거
+    setTimeout(() => {
+        notificationItem.classList.remove('new');
+    }, 3000);
+
+    // 최대 10개 알림만 유지
+    while (notificationList.children.length > 10) {
+        notificationList.removeChild(notificationList.lastChild);
+    }
+
+    // 브라우저 알림
+    if (Notification.permission === 'granted') {
+        new Notification('출석 알림', {
+            body: `${record.name}님이 출석했습니다! (${sessionName})`,
+            icon: '👔'
+        });
+    } else if (Notification.permission !== 'denied') {
+        Notification.requestPermission();
+    }
+}
 
 // QR 코드 생성
 function generateQRCode() {
@@ -72,6 +162,11 @@ function generateQRCode() {
 
     // 입력 필드 초기화
     document.getElementById('sessionName').value = '';
+
+    // 브라우저 알림 권한 요청
+    if (Notification.permission === 'default') {
+        Notification.requestPermission();
+    }
 
     alert('QR 코드가 생성되었습니다!');
 }
@@ -169,9 +264,9 @@ function loadAttendanceList(filterSessionId = 'all') {
 
         return `
             <div class="attendance-item">
-                <div class="student-info">
+                <div class="employee-info">
                     <div class="name">${record.name}</div>
-                    <div class="id">학번: ${record.studentId}</div>
+                    <div class="id">사번: ${record.employeeId || '-'}</div>
                 </div>
                 <div>
                     <span class="session-badge">${sessionName}</span>
@@ -201,6 +296,8 @@ function clearAllData() {
     localStorage.removeItem(STORAGE_KEYS.CURRENT_SESSION);
 
     document.getElementById('qrDisplay').style.display = 'none';
+    document.getElementById('notificationSection').style.display = 'none';
+    document.getElementById('notificationList').innerHTML = '';
     loadAttendanceList();
     loadSessionFilter();
 

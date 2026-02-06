@@ -3,42 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>학생 - QR 출석 체크</title>
+    <title>직원 - QR 출석 체크</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>학생 출석 체크</h1>
+            <h1>직원 출석 체크</h1>
             <a href="index.html" class="back-btn">홈으로</a>
         </header>
 
-        <section class="student-section">
-            <div class="form-group">
-                <label for="studentName">이름:</label>
-                <input type="text" id="studentName" placeholder="이름을 입력하세요">
-            </div>
-            <div class="form-group">
-                <label for="studentId">학번:</label>
-                <input type="text" id="studentId" placeholder="학번을 입력하세요">
+        <!-- 단계 1: QR 코드 스캔 -->
+        <section class="step-section" id="step1">
+            <div class="step-indicator">
+                <span class="step active">1. QR 스캔</span>
+                <span class="step">2. 정보 입력</span>
+                <span class="step">3. 완료</span>
             </div>
 
-            <h2>QR 코드 스캔</h2>
-            <button id="startScan" class="btn btn-primary">카메라 시작</button>
+            <h2>QR 코드를 스캔하세요</h2>
+            <button id="startScan" class="btn btn-primary btn-large">카메라로 QR 스캔</button>
 
             <div id="qrReader" style="display: none;">
                 <div id="reader"></div>
-                <button id="stopScan" class="btn btn-danger">스캔 중지</button>
+                <button id="stopScan" class="btn btn-danger">스캔 취소</button>
             </div>
 
-            <div id="manualInput" class="manual-input">
-                <h3>또는 수동 입력</h3>
-                <input type="text" id="qrCode" placeholder="QR 코드 값 입력">
-                <button id="submitAttendance" class="btn btn-success">출석 제출</button>
+            <div class="manual-input">
+                <h3>또는 코드 직접 입력</h3>
+                <input type="text" id="manualCode" placeholder="QR 코드 값 입력">
+                <button id="submitCode" class="btn btn-secondary">확인</button>
             </div>
-
-            <div id="result" class="result-message"></div>
         </section>
+
+        <!-- 단계 2: 정보 입력 -->
+        <section class="step-section" id="step2" style="display: none;">
+            <div class="step-indicator">
+                <span class="step completed">1. QR 스캔</span>
+                <span class="step active">2. 정보 입력</span>
+                <span class="step">3. 완료</span>
+            </div>
+
+            <h2>출석 정보 입력</h2>
+            <p class="session-info">세션: <span id="scannedSession"></span></p>
+
+            <div class="form-group">
+                <label for="employeeName">이름:</label>
+                <input type="text" id="employeeName" placeholder="이름을 입력하세요">
+            </div>
+            <div class="form-group">
+                <label for="employeeId">사번 (선택):</label>
+                <input type="text" id="employeeId" placeholder="사번을 입력하세요">
+            </div>
+
+            <div class="button-group">
+                <button id="backToStep1" class="btn btn-secondary">이전</button>
+                <button id="submitAttendance" class="btn btn-success btn-large">출석하기</button>
+            </div>
+        </section>
+
+        <!-- 단계 3: 완료 -->
+        <section class="step-section" id="step3" style="display: none;">
+            <div class="step-indicator">
+                <span class="step completed">1. QR 스캔</span>
+                <span class="step completed">2. 정보 입력</span>
+                <span class="step active">3. 완료</span>
+            </div>
+
+            <div class="success-message">
+                <div class="success-icon">✓</div>
+                <h2>출석 완료!</h2>
+                <p id="completionMessage"></p>
+            </div>
+
+            <button id="resetProcess" class="btn btn-primary">처음으로</button>
+        </section>
+
+        <!-- 에러 메시지 -->
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
     </div>
 
     <script src="https://unpkg.com/html5-qrcode"></script>

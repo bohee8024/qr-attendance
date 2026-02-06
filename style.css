@@ -507,6 +507,73 @@ section h2 {
     color: #666;
 }
 
+/* 에러 박스 (잘못된 접근) */
+.error-box {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.error-icon {
+    width: 80px;
+    height: 80px;
+    background: #dc3545;
+    color: white;
+    font-size: 40px;
+    font-weight: bold;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.error-box h2 {
+    color: #dc3545;
+    margin-bottom: 10px;
+}
+
+.error-box p {
+    color: #666;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.error-box .sub-text {
+    font-size: 14px;
+    color: #999;
+    margin-bottom: 20px;
+}
+
+/* 정보 박스 */
+.info-box {
+    background: #e7f3ff;
+    border: 2px solid #b3d7ff;
+    border-radius: 10px;
+    padding: 25px;
+    margin-top: 30px;
+}
+
+.info-box h3 {
+    color: #0066cc;
+    margin-bottom: 15px;
+}
+
+.info-box ol {
+    margin-left: 20px;
+    color: #333;
+}
+
+.info-box li {
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+/* 싱글 모드 선택 */
+.mode-selection.single {
+    max-width: 400px;
+    margin: 40px auto 0;
+}
+
 /* 반응형 */
 @media (max-width: 768px) {
     .container {

@@ -110,6 +110,16 @@ function showNotification(record) {
     }
 }
 
+// 출석 페이지 URL 생성
+function getAttendanceUrl(sessionId, sessionName) {
+    // 현재 페이지 URL을 기반으로 출석 페이지 URL 생성
+    const baseUrl = window.location.href.replace('admin.html', 'student.html');
+    const url = new URL(baseUrl);
+    url.searchParams.set('session', sessionId);
+    url.searchParams.set('name', sessionName);
+    return url.toString();
+}
+
 // QR 코드 생성
 function generateQRCode() {
     const sessionName = document.getElementById('sessionName').value.trim();
@@ -127,7 +137,7 @@ function generateQRCode() {
     }
 
     // 세션 ID 생성 (타임스탬프 + 랜덤)
-    const sessionId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+    const sessionId = Date.now() + '-' + Math.random().toString(36).substring(2, 11);
 
     // 세션 정보 저장
     const sessionData = {
@@ -146,14 +156,17 @@ function generateQRCode() {
     const qrcodeDiv = document.getElementById('qrcode');
     qrcodeDiv.innerHTML = '';
 
-    // QR 코드 생성
+    // 출석 페이지 URL 생성
+    const attendanceUrl = getAttendanceUrl(sessionId, sessionName);
+
+    // QR 코드 생성 (URL 포함)
     qrCodeInstance = new QRCode(qrcodeDiv, {
-        text: sessionId,
+        text: attendanceUrl,
         width: 256,
         height: 256,
         colorDark: '#000000',
         colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.H
+        correctLevel: QRCode.CorrectLevel.L
     });
 
     // 세션 정보 표시
@@ -168,7 +181,7 @@ function generateQRCode() {
         Notification.requestPermission();
     }
 
-    alert('QR 코드가 생성되었습니다!');
+    alert('QR 코드가 생성되었습니다! 직원들에게 이 QR 코드를 스캔하도록 안내하세요.');
 }
 
 // 세션 종료
@@ -192,13 +205,16 @@ function checkActiveSession() {
         const qrcodeDiv = document.getElementById('qrcode');
         qrcodeDiv.innerHTML = '';
 
+        // 출석 페이지 URL 생성
+        const attendanceUrl = getAttendanceUrl(sessionData.id, sessionData.name);
+
         qrCodeInstance = new QRCode(qrcodeDiv, {
-            text: sessionData.id,
+            text: attendanceUrl,
             width: 256,
             height: 256,
             colorDark: '#000000',
             colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.H
+            correctLevel: QRCode.CorrectLevel.L
         });
 
         document.getElementById('currentSession').textContent = sessionData.name;

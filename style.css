@@ -445,6 +445,12 @@ section h2 {
     font-size: 16px;
 }
 
+.success-message .close-hint {
+    margin-top: 30px;
+    font-size: 14px;
+    color: #999;
+}
+
 /* 에러 메시지 */
 .error-message {
     background: #f8d7da;

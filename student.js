@@ -13,13 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // 이벤트 리스너 등록
     document.getElementById('backToHome').addEventListener('click', goBackToHome);
     document.getElementById('submitAttendance').addEventListener('click', submitAttendance);
-    document.getElementById('resetProcess').addEventListener('click', resetProcess);
-
-    // 이전에 저장된 이름 불러오기
-    const savedName = localStorage.getItem('employeeName');
-    const savedId = localStorage.getItem('employeeId');
-    if (savedName) document.getElementById('employeeName').value = savedName;
-    if (savedId) document.getElementById('employeeId').value = savedId;
 
     // URL 파라미터 확인
     checkUrlParameters();
@@ -118,15 +111,6 @@ function submitAttendance() {
 
     // 단계 2로 이동 (완료)
     goToStep2(name);
-}
-
-// 프로세스 리셋 (다른 직원 출석용)
-function resetProcess() {
-    document.getElementById('employeeName').value = '';
-    document.getElementById('employeeId').value = '';
-    localStorage.removeItem('employeeName');
-    localStorage.removeItem('employeeId');
-    goToStep1();
 }
 
 // 에러 메시지 표시

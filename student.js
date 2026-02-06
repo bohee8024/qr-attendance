@@ -64,7 +64,7 @@ function goBackToHome() {
 // 출석 제출
 async function submitAttendance() {
     const name = document.getElementById('employeeName').value.trim();
-    const employeeId = document.getElementById('employeeId').value.trim();
+    const vehicleNumber = document.getElementById('vehicleNumber').value.trim();
 
     if (!name) {
         showError('이름을 입력해주세요.');
@@ -87,7 +87,7 @@ async function submitAttendance() {
         const existingRecords = snapshot.val();
         if (existingRecords) {
             const duplicate = Object.values(existingRecords).find(r =>
-                r.name === name && (employeeId ? r.employeeId === employeeId : true)
+                r.name === name
             );
 
             if (duplicate) {
@@ -104,7 +104,7 @@ async function submitAttendance() {
             sessionId: scannedSessionId,
             sessionName: scannedSessionName,
             name: name,
-            employeeId: employeeId || '-',
+            vehicleNumber: vehicleNumber || '-',
             timestamp: new Date().toISOString()
         });
 

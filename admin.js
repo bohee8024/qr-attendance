@@ -246,7 +246,7 @@ function loadAttendanceList(filterSessionId = 'all') {
                 <div class="attendance-item">
                     <div class="employee-info">
                         <div class="name">${record.name}</div>
-                        <div class="id">사번: ${record.employeeId || '-'}</div>
+                        <div class="id">차량: ${record.vehicleNumber || '-'}</div>
                     </div>
                     <div>
                         <span class="session-badge">${record.sessionName}</span>

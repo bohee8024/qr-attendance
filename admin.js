@@ -177,8 +177,9 @@ function loadActiveSessions() {
         section.style.display = 'block';
         list.innerHTML = activeSessions.map(session => {
             const startTime = new Date(session.startTime).toLocaleString('ko-KR');
+            const escapedName = session.name.replace(/'/g, "\\'").replace(/"/g, "&quot;");
             return `
-                <div class="active-session-item" onclick="showQRForSession('${session.id}', '${session.name}')">
+                <div class="active-session-item" onclick="showQRForSession('${session.id}', '${escapedName}')">
                     <div class="session-name">${session.name}</div>
                     <div class="session-time">시작: ${startTime}</div>
                     <button class="btn btn-primary btn-small">QR 코드 보기</button>

@@ -246,11 +246,13 @@ function showNotification(record) {
     const time = new Date(record.timestamp).toLocaleTimeString('ko-KR');
     const checkTypeText = record.checkType === 'out' ? '퇴실' : '출석';
 
+    const parkingText = record.hasParking ? '주차 O' : '주차 X';
+
     const notificationItem = document.createElement('div');
     notificationItem.className = 'notification-item new';
     notificationItem.innerHTML = `
         <div class="notification-content">
-            <strong>${record.name}</strong>님이 ${checkTypeText}했습니다!
+            <strong>${record.name}</strong>님이 ${checkTypeText}했습니다! (${parkingText})
             <span class="notification-meta">${record.sessionName} · ${time}</span>
         </div>
     `;
@@ -271,7 +273,7 @@ function showNotification(record) {
     // 브라우저 알림
     if (Notification.permission === 'granted') {
         new Notification(`${checkTypeText} 알림`, {
-            body: `${record.name}님이 ${checkTypeText}했습니다! (${record.sessionName})`,
+            body: `${record.name}님이 ${checkTypeText}했습니다! (${parkingText}, ${record.sessionName})`,
             icon: '👔'
         });
     }

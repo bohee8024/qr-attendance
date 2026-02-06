@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('endSession').addEventListener('click', endSession);
     document.getElementById('sessionFilter').addEventListener('change', filterAttendance);
     document.getElementById('clearData').addEventListener('click', clearAllData);
+    document.getElementById('downloadCSV').addEventListener('click', downloadCSV);
 
     // 세션 목록 로드
     loadSessions();
@@ -291,5 +292,68 @@ async function clearAllData() {
     } catch (error) {
         console.error('데이터 삭제 실패:', error);
         alert('데이터 삭제에 실패했습니다.');
+    }
+}
+
+// CSV 다운로드
+async function downloadCSV() {
+    try {
+        const filterValue = document.getElementById('sessionFilter').value;
+        const attendanceRef = database.ref('attendance');
+        const snapshot = await attendanceRef.once('value');
+        const records = snapshot.val();
+
+        if (!records) {
+            alert('다운로드할 데이터가 없습니다.');
+            return;
+        }
+
+        let recordsArray = Object.values(records);
+
+        // 필터링 적용
+        if (filterValue !== 'all') {
+            recordsArray = recordsArray.filter(r => r.sessionId === filterValue);
+        }
+
+        if (recordsArray.length === 0) {
+            alert('다운로드할 데이터가 없습니다.');
+            return;
+        }
+
+        // 시간순 정렬
+        recordsArray.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+        // CSV 헤더
+        const headers = ['세션명', '이름', '차량번호', '출석시간'];
+
+        // CSV 데이터 생성
+        const csvRows = [headers.join(',')];
+
+        recordsArray.forEach(record => {
+            const time = new Date(record.timestamp).toLocaleString('ko-KR');
+            const row = [
+                `"${record.sessionName}"`,
+                `"${record.name}"`,
+                `"${record.vehicleNumber || '-'}"`,
+                `"${time}"`
+            ];
+            csvRows.push(row.join(','));
+        });
+
+        // CSV 파일 생성 및 다운로드
+        const csvContent = '\uFEFF' + csvRows.join('\n'); // BOM 추가 (한글 깨짐 방지)
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `출석데이터_${new Date().toLocaleDateString('ko-KR')}.csv`;
+        link.click();
+
+        URL.revokeObjectURL(url);
+
+    } catch (error) {
+        console.error('CSV 다운로드 실패:', error);
+        alert('CSV 다운로드에 실패했습니다.');
     }
 }

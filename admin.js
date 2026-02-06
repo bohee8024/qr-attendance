@@ -244,12 +244,13 @@ function showNotification(record) {
     notificationSection.style.display = 'block';
 
     const time = new Date(record.timestamp).toLocaleTimeString('ko-KR');
+    const checkTypeText = record.checkType === 'out' ? '퇴실' : '출석';
 
     const notificationItem = document.createElement('div');
     notificationItem.className = 'notification-item new';
     notificationItem.innerHTML = `
         <div class="notification-content">
-            <strong>${record.name}</strong>님이 출석했습니다!
+            <strong>${record.name}</strong>님이 ${checkTypeText}했습니다!
             <span class="notification-meta">${record.sessionName} · ${time}</span>
         </div>
     `;
@@ -269,8 +270,8 @@ function showNotification(record) {
 
     // 브라우저 알림
     if (Notification.permission === 'granted') {
-        new Notification('출석 알림', {
-            body: `${record.name}님이 출석했습니다! (${record.sessionName})`,
+        new Notification(`${checkTypeText} 알림`, {
+            body: `${record.name}님이 ${checkTypeText}했습니다! (${record.sessionName})`,
             icon: '👔'
         });
     }
@@ -308,14 +309,18 @@ function loadAttendanceList(filterSessionId = 'all') {
         // 출석 목록 생성
         listDiv.innerHTML = recordsArray.map(record => {
             const time = new Date(record.timestamp).toLocaleString('ko-KR');
+            const checkTypeText = record.checkType === 'out' ? '퇴실' : '출석';
+            const checkTypeClass = record.checkType === 'out' ? 'check-out' : 'check-in';
+            const parkingText = record.hasParking ? '주차 O' : '주차 X';
 
             return `
                 <div class="attendance-item">
                     <div class="employee-info">
                         <div class="name">${record.name}</div>
-                        <div class="id">차량: ${record.vehicleNumber || '-'}</div>
+                        <div class="id">${parkingText}</div>
                     </div>
-                    <div>
+                    <div class="attendance-badges">
+                        <span class="check-type-badge ${checkTypeClass}">${checkTypeText}</span>
                         <span class="session-badge">${record.sessionName}</span>
                         <span class="time-badge">${time}</span>
                     </div>
@@ -390,17 +395,20 @@ async function downloadCSV() {
         recordsArray.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
         // CSV 헤더
-        const headers = ['세션명', '이름', '차량번호', '출석시간'];
+        const headers = ['세션명', '이름', '구분', '주차여부', '시간'];
 
         // CSV 데이터 생성
         const csvRows = [headers.join(',')];
 
         recordsArray.forEach(record => {
             const time = new Date(record.timestamp).toLocaleString('ko-KR');
+            const checkTypeText = record.checkType === 'out' ? '퇴실' : '출석';
+            const parkingText = record.hasParking ? 'O' : 'X';
             const row = [
                 `"${record.sessionName}"`,
                 `"${record.name}"`,
-                `"${record.vehicleNumber || '-'}"`,
+                `"${checkTypeText}"`,
+                `"${parkingText}"`,
                 `"${time}"`
             ];
             csvRows.push(row.join(','));

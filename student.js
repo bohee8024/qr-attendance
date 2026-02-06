@@ -47,11 +47,11 @@ function goToStep1() {
 }
 
 // 단계 2: 완료
-function goToStep2(name) {
+function goToStep2(name, checkTypeText = '출석') {
     document.getElementById('step1').style.display = 'none';
     document.getElementById('step2').style.display = 'block';
     document.getElementById('completionMessage').textContent =
-        `${name}님의 출석이 완료되었습니다.`;
+        `${name}님의 ${checkTypeText}이 완료되었습니다.`;
     document.getElementById('completionSession').textContent = scannedSessionName;
     hideError();
 }
@@ -61,10 +61,11 @@ function goBackToHome() {
     window.location.href = 'index.html';
 }
 
-// 출석 제출
+// 출석/퇴실 제출
 async function submitAttendance() {
     const name = document.getElementById('employeeName').value.trim();
-    const vehicleNumber = document.getElementById('vehicleNumber').value.trim();
+    const hasParking = document.getElementById('hasParking').checked;
+    const checkType = document.querySelector('input[name="checkType"]:checked').value;
 
     if (!name) {
         showError('이름을 입력해주세요.');
@@ -76,8 +77,10 @@ async function submitAttendance() {
     submitBtn.disabled = true;
     submitBtn.textContent = '처리 중...';
 
+    const checkTypeText = checkType === 'in' ? '출석' : '퇴실';
+
     try {
-        // 중복 출석 확인
+        // 중복 체크 확인
         const attendanceRef = database.ref('attendance');
         const snapshot = await attendanceRef
             .orderByChild('sessionId')
@@ -87,35 +90,36 @@ async function submitAttendance() {
         const existingRecords = snapshot.val();
         if (existingRecords) {
             const duplicate = Object.values(existingRecords).find(r =>
-                r.name === name
+                r.name === name && r.checkType === checkType
             );
 
             if (duplicate) {
-                showError('이미 출석 체크를 완료했습니다.');
+                showError(`이미 ${checkTypeText} 체크를 완료했습니다.`);
                 submitBtn.disabled = false;
-                submitBtn.textContent = '출석하기';
+                submitBtn.textContent = '체크하기';
                 return;
             }
         }
 
-        // 출석 기록 추가
+        // 기록 추가
         const newAttendanceRef = attendanceRef.push();
         await newAttendanceRef.set({
             sessionId: scannedSessionId,
             sessionName: scannedSessionName,
             name: name,
-            vehicleNumber: vehicleNumber || '-',
+            hasParking: hasParking,
+            checkType: checkType,
             timestamp: new Date().toISOString()
         });
 
         // 단계 2로 이동 (완료)
-        goToStep2(name);
+        goToStep2(name, checkTypeText);
 
     } catch (error) {
-        console.error('출석 저장 실패:', error);
-        showError('출석 저장에 실패했습니다. 다시 시도해주세요.');
+        console.error('저장 실패:', error);
+        showError('저장에 실패했습니다. 다시 시도해주세요.');
         submitBtn.disabled = false;
-        submitBtn.textContent = '출석하기';
+        submitBtn.textContent = '체크하기';
     }
 }
 

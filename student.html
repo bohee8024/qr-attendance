@@ -37,13 +37,30 @@
                 <label for="employeeName">이름 *</label>
                 <input type="text" id="employeeName" placeholder="이름을 입력하세요" autocomplete="name">
             </div>
+
+            <div class="form-group checkbox-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="hasParking">
+                    <span class="checkbox-text">주차 여부</span>
+                </label>
+            </div>
+
             <div class="form-group">
-                <label for="vehicleNumber">차량번호 (선택)</label>
-                <input type="text" id="vehicleNumber" placeholder="예: 12가 3456">
+                <label>체크 유형 *</label>
+                <div class="radio-group">
+                    <label class="radio-label">
+                        <input type="radio" name="checkType" value="in" checked>
+                        <span class="radio-text">출석</span>
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="checkType" value="out">
+                        <span class="radio-text">퇴실</span>
+                    </label>
+                </div>
             </div>
 
             <div class="button-group">
-                <button id="submitAttendance" class="btn btn-success btn-large">출석하기</button>
+                <button id="submitAttendance" class="btn btn-success btn-large">체크하기</button>
             </div>
 
             <!-- 에러 메시지 -->
